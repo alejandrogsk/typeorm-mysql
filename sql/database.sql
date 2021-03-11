@@ -1,0 +1,10 @@
+CREATE DATABASE todo_app_ts_mysql;
+
+CREATE TABLE todos(
+    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DESCRIBE todos;
