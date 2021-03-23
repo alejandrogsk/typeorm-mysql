@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import key from '../private.keys';
+import dotenv from 'dotenv'
+dotenv.config()
+
+
 interface IPayload {
 	id: number;
 	iat: number;
@@ -19,7 +22,7 @@ const verifyToken = (
 
         const payload = jwt.verify(
             token,
-            key.jwtPrivateKey || "someKey"
+            process.env.TOKEN_SECRET || "someKey"
         ) as IPayload;
             /**
              * for userId to work it was necessary to configure the types.d.ts

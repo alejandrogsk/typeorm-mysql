@@ -52,7 +52,7 @@ export class App {
             await connection.synchronize();
 
         } catch (err) {
-            console.log('error en tablas', err)
+            console.log('error on app.ts', err)
         }
     }
 
