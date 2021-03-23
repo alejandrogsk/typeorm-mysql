@@ -1,15 +1,16 @@
 import { Router } from 'express';
-import {getTodos, createTodo, getTodo, deleteTodo, updateTodo} from '../controllers/todos.controller';
+import {createTodo, getUserTodos, getUserTodo, modifyTodo, deleteTodo} from '../controllers/todos.controller'
+import verifyToken from '../middlewares/verifyToken';
 
 const router = Router();
 
 router.route('/')
-    .get(getTodos)
-    .post(createTodo);
+    .post(verifyToken, createTodo)
+    .get(verifyToken, getUserTodos);
 
 router.route('/:todoId')
-    .get(getTodo)
-    .delete(deleteTodo)
-    .put(updateTodo);
+    .get(verifyToken, getUserTodo)
+    .put(verifyToken, modifyTodo)
+    .delete(verifyToken, deleteTodo);
 
 export default router

@@ -14,6 +14,8 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = new app_1.App(4000);
         yield app.listen();
+        yield app.dbConnection();
     });
 }
 main();
+//# sourceMappingURL=index.js.map

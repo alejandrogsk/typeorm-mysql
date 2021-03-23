@@ -6,3 +6,4 @@ const router = express_1.Router();
 router.route('/')
     .get(index_controller_1.indexWelcome);
 exports.default = router;
+//# sourceMappingURL=index.routes.js.map

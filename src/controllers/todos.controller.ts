@@ -1,49 +1,84 @@
 import {Request, Response} from 'express';
-import {connect} from '../database';
-import { Todo } from '../interface/todo.interface';
+import {getRepository, getManager} from 'typeorm';
+import {TodoEntity} from '../entity/todos.entity';
+import {TodoAttributes} from '../interface/entries.attributes';
 
-export const getTodos = async (req: Request, res: Response): Promise<Response> => {
-    const conn = await connect();
-    const todos = await conn.query('SELECT * FROM todos');
-    return res.json(todos[0])
+export const createTodo = async (req: Request, res: Response) => {
+    const entityManager = getManager();
+    const userId = req.userId;
+    const data = req.body;
+
+    const createTodo = entityManager.create(TodoEntity, {...data, user: userId});
+    const saveTodo = await entityManager.save(createTodo);
+
+    console.log(saveTodo)
+    return res.json({ok: true, saveTodo});
+};
+
+
+//Get the TODOS for one user
+export const getUserTodos = async (req: Request, res: Response) => {
+    const entityManager = getManager();
+    const userId = req.userId;
+
+    const getTodos: TodoEntity[] = await entityManager.find(TodoEntity, {where: {user: userId}});
+
+    res.json({ok: true, getTodos});
+};
+
+
+//Get one TODO for one user
+export const getUserTodo = async (req: Request, res: Response) => {
+    const entityManager = getManager();
+    const userId = req.userId;
+    const postId = req.params.todoId;
+
+    //filter based on userId and postId
+    const getTodos: TodoEntity[] = await entityManager.find(TodoEntity, { 
+        where: {
+            user: userId,
+            id: postId
+        } 
+    });
+
+    //if does't find a todo send an error
+    if(getTodos.length !== 1) return res.json({ok:false, msg: "we couldn't find the TODO"})
+
+    //extract the object
+    const todo: TodoEntity = getTodos[0];
+
+    //return the TODO
+    res.json({ok: true, todo});
 }
 
-export const createTodo = async (req: Request, res: Response): Promise<Response> => {
-    const newTodo: Todo = await req.body;
-    const conn = await connect();
-    //Como validar una query? buscar en google
-    await conn.query('INSERT INTO todos SET ?', [newTodo]);
 
-    return res.json(newTodo);
-}
+export const modifyTodo = async (req: Request, res: Response) => {
+    const entityManager = getManager();
+    const data = req.body;
+    const userId = req.userId;
+    const postId = req.params.todoId;
 
+    await entityManager.update(TodoEntity, { user: userId, id: postId }, data);
 
-export const getTodo = async ( req: Request, res: Response ): Promise<Response> => {
+    const findUpdatedTodo: TodoEntity[] = await entityManager.find(TodoEntity, { 
+        where: {
+            user: userId,
+            id: postId
+        } 
+    });
+
+    const todoUpdated: TodoEntity = findUpdatedTodo[0];
     
-    const id = req.params.todoId;
-
-    const conn = await connect();
-    const todo = await conn.query('SELECT * FROM todos WHERE id = ?', [id]);
-
-    return res.json(todo[0])
-}
-
-export const deleteTodo = async ( req: Request, res: Response ): Promise<Response> => {
-    const id = req.params.todoId;
-    const conn = await connect();
-    const todo = await conn.query('DELETE FROM todos WHERE id = ?', [id]);
-
-    return res.json({message: 'Todo deleted'})
-}
+    return res.json({ok: false, todoUpdated});
+}   
 
 
-export const updateTodo = async ( req: Request, res: Response ): Promise<Response> => {
-    const id = req.params.todoId;
+export const deleteTodo = async ( req: Request, res: Response ) => {
+    const entityManager = getManager();
+    const userId = req.userId;
+    const postId = req.params.todoId;
 
-    const updateTodo: Todo = req.body;
+    await entityManager.delete(TodoEntity, { user: userId, id: postId });
 
-    const conn = await connect();
-    const todo = await conn.query('UPDATE todos set ? WHERE id = ?', [updateTodo, id]);
-
-    return res.json({message: 'Todo updated'})
+    return res.json({ok: true, msg: "Todo has been deleted"});
 }

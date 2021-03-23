@@ -1,10 +1,15 @@
+import "reflect-metadata";
 import express, {Application} from 'express';
-import morgar from 'morgan';
 
+import morgar from 'morgan';
+import {createConnection} from 'typeorm'
 
 //Routes
 import IndexRoute from './routes/index.routes';
-import PostRoute from './routes/todo.routes';
+import TodoRoute from './routes/todo.routes';
+import UserRoute from './routes/user.routes';
+
+
 
 export class App {
     private app: Application;
@@ -23,17 +28,32 @@ export class App {
     middlewares() {
         this.app.use(morgar('dev'));
         this.app.use(express.json())
+        
     }
 
 
     routes() {
         this.app.use(IndexRoute);
-        this.app.use('/todo', PostRoute)
+        this.app.use('/todos', TodoRoute)
+        this.app.use('/auth', UserRoute)
     }
 
     async listen(){
         await this.app.listen(this.app.get('port'))
         console.log(`Server on port ${this.app.get('port')}`)
+    }
+
+    async dbConnection() {
+        try {
+            const connection = await createConnection();
+
+            console.log('Connection has been established successfully.');
+            
+            await connection.synchronize();
+
+        } catch (err) {
+            console.log('error en tablas', err)
+        }
     }
 
 }   

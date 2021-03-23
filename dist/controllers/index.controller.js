@@ -5,3 +5,4 @@ const indexWelcome = (req, res) => {
     return res.json('Todos API');
 };
 exports.indexWelcome = indexWelcome;
+//# sourceMappingURL=index.controller.js.map
